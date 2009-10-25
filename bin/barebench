@@ -1,0 +1,147 @@
+#!/usr/bin/env ruby
+
+#--
+# Copyright 2009 by Stefan Rusterholz.
+# All rights reserved.
+# See LICENSE.txt for permissions.
+#++
+
+
+
+Version = "0.0.1"
+
+
+
+require 'optparse'
+begin
+  # if barebench is installed as a gem, the executable is be wrapped by rubgems anyway, so we don't
+  # need to require rubygems ourself.
+  require 'barebench'
+rescue LoadError
+  # assume barebench is not installed and this is a cold-run from source
+  $LOAD_PATH.unshift(File.expand_path("#{__FILE__}/../../lib"))
+  require 'barebench'
+end
+
+
+
+# Get all the command-line arguments and adapt options to it
+format      = ENV['FORMAT'] || 'cli'
+setup_path  = nil
+
+opts = OptionParser.new("", 24, '  ') do |opts|
+  opts.banner = "Usage: barebench [options] [glob, ...]"
+
+  opts.separator "Glob defaults to 'bench/bench/**/*.rb'"
+  opts.separator "Providing a directory as glob is equivalent to dir/**/*.rb\n"
+  opts.separator "Options:"
+
+  opts.on(nil, "--init", "create the necessary directories and files") {
+    core = %w[
+      bench
+    ]
+    mirror = {
+      'bin'  => %w[test/helper/suite test/suite],
+      'lib'  => %w[test/helper/suite test/suite],
+      'rake' => %w[test/helper/suite test/suite],
+    }
+    files = {
+      'test/setup.rb' => <<-END_OF_SETUP.gsub(/^ {8}/, '')
+        $LOAD_PATH.unshift(File.expand_path("#{__FILE__}/../../lib")) # Add PROJECT/lib to $LOAD_PATH
+      END_OF_SETUP
+    }
+
+    puts "Creating all directories and files needed in #{File.expand_path('.')}"
+    core.each do |dir|
+      if File.exist?(dir) then
+        puts "Directory #{dir} exists already -- skipping"
+      else
+        puts "Creating #{dir}"
+        Dir.mkdir(dir)
+      end
+    end
+    mirror.each do |path, destinations|
+      if File.exist?(path) then
+        destinations.each do |destination|
+          destination = File.join(destination,path)
+          if File.exist?(dir) then
+            puts "Mirror #{destination} of #{path} exists already -- skipping"
+          else
+            puts "Mirroring #{path} in #{destination}"
+            Dir.mkdir(destination)
+          end
+        end
+      end
+    end
+    files.each do |path, data|
+      if File.exist?(path) then
+        puts "File #{path} exists already -- skipping"
+      else
+        puts "Writing #{path}"
+        File.open(path, 'wb') do |fh|
+          fh.write(data)
+        end
+      end
+    end
+
+    exit
+  }
+
+  opts.on("-f", "--format FORMAT", "use FORMAT for output") { |use|
+    format = use
+  }
+
+  opts.on("-F", "--formats", "show available formats") { |use|
+    puts "Available formats:"
+    Dir.glob("{#{$LOAD_PATH.join(',')}}/barebench/run/*.rb") { |path|
+      puts "- #{File.basename(path, '.rb')}"
+    }
+    exit
+  }
+
+  opts.on("-d", "--debug", "set debugging flags (set $DEBUG to true)") {
+    $DEBUG   = true
+    $VERBOSE = true
+  }
+
+  opts.on("-s", "--setup FILE", "specify setup file") { |path|
+    setup_path = path
+  }
+
+  opts.on("-v", "--version", "print the version and exit") {
+    puts "barebench executable version #{Version}, library version #{BareBench::VERSION}"
+    exit
+  }
+
+  opts.on("-w", "--warn", "turn warnings on for your script") {
+    $VERBOSE = true
+  }
+
+  opts.parse! ARGV
+end
+
+
+
+# Load the setup file, all helper files and all test files
+if ARGV.empty? then
+  BareBench.load_standard_test_files(
+    :verbose    => $VERBOSE,
+    :setup_path => setup_path,
+    :chdir      => '.'
+  )
+else
+  load(setup_path) if setup_path && File.exist?(setup_path)
+  ARGV.each { |path|
+    if File.directory?(path) then
+      Dir.glob("#{path}/**/*.rb") { load(path) }
+    else
+      Dir.glob(path) { load(path) }
+    end
+  }
+end
+
+
+
+# Run the tests
+puts if $VERBOSE
+BareBench.run(:format => format)

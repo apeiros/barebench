@@ -3,7 +3,7 @@
 ._*
 
 # BBedit Projectfile doesn't need versioning
-/baretest.bbprojectd
+/barebench.bbprojectd
 
 # We don't care about build products
 /docs/*

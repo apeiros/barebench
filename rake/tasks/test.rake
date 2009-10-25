@@ -9,7 +9,7 @@
 # This rake task expects to be in PROJECT_DIR/tasks/test.rake
 # It assumes that the tests are in PROJECT_DIR/test/**/*.rb
 # This is relevant as it calculates the paths accordingly.
-# It uses BareTest.load_standard_test_files to load setup and test files.
+# It uses BareBench.load_standard_test_files to load setup and test files.
 # This means it will also load a test/setup.rb file if present, where
 # you can add paths to $LOAD_PATH.
 
@@ -30,7 +30,7 @@ namespace :test do
   desc "Run testsuite. Set FORMAT env variable to change the formatter used, INTERACTIVE to have irb mode."
   task :run do
     begin
-      require 'baretest'
+      require 'barebench'
     rescue LoadError => e
       puts "Could not run tests: #{e}"
     else
@@ -47,7 +47,7 @@ namespace :test do
             "your directory structure first (see rake test:structure)." unless test_dir
   
       # Load all test definitions
-      BareTest.load_standard_test_files(
+      BareBench.load_standard_test_files(
         :verbose    => $VERBOSE,
         :setup_file => 'test/setup.rb',
         :chdir      => File.dirname(test_dir) # must chdir to 1 above the 'test' dir
@@ -56,7 +56,7 @@ namespace :test do
       # Run all tests
       format      = ENV["FORMAT"] || 'cli'
       interactive = ENV["INTERACTIVE"] == 'true'
-      BareTest.run(:format => format, :interactive => interactive)
+      BareBench.run(:format => format, :interactive => interactive)
     end
   end
 end

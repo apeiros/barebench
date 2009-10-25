@@ -1,4 +1,4 @@
-BareTest.run_if_mainfile do
+BareBench.run_if_mainfile do
   assert "Sample assert" do
     true
   end

@@ -1,1 +1,1 @@
-require 'baretest'
+require 'barebench'

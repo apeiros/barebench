@@ -10,8 +10,8 @@ task :default => 'test'
 
 # Project details (defaults are in rake/initialize, some cleanup is done per section in the
 # task 'prerequisite' in each .task file. Further cleanup is done in post_load.rake)
-Project.meta.name             = 'baretest'
-Project.meta.version          = version_proc("BareTest::VERSION")
+Project.meta.name             = 'barebench'
+Project.meta.version          = version_proc("BareBench::VERSION")
 Project.meta.readme           = 'README.rdoc'
 Project.meta.summary          = extract_summary()
 Project.meta.description      = extract_description()
@@ -27,10 +27,10 @@ Project.manifest.ignore       = %w[
                                     pkg/**/*
                                     rake/**/*
                                     web/**/*
-                                    baretest.bbprojectd/**/*
+                                    barebench.bbprojectd/**/*
                                 ]
 
-Project.rubyforge.project     = 'baretest'
-Project.rubyforge.path        = 'baretest'
+Project.rubyforge.project     = 'barebench'
+Project.rubyforge.path        = 'barebench'
 
 Project.rdoc.include         << 'doc/*.rdoc'

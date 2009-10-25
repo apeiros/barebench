@@ -10,4 +10,4 @@ found.uniq
       "Hash.new", "IRB.conf", "IRB.setup", "Module.new", "StringIO.new", "Struct.new", "Time.now"]
 
 Hardening:
-see lib/baretest/safe.rb
+see lib/barebench/safe.rb
